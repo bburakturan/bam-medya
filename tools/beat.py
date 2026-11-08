@@ -45,7 +45,21 @@ for b in range(bars):
     # marimba-ish pluck
     for off,n in [(0.5,2),(1.25,1),(2,2),(3,0),(3.5,1)]:
         add(tone(chords[b%4][n]*2,.3,14,(1,.2,.05)),t0+off*beat,.35,.18)
+# --- BAM marka sesi (sonic logo): logo 7.1 sn'de açılırken ---
+def bell(f,d=1.8):
+    x=t(d); s=(np.sin(2*np.pi*f*x)+.45*np.sin(2*np.pi*f*2.76*x)*np.exp(-x*3)+.25*np.sin(2*np.pi*f*5.4*x)*np.exp(-x*6))
+    return s*np.exp(-x*2.2)*np.minimum(1,x*400)
+def boom():
+    x=t(1.2); f=38+60*np.exp(-x*18); return np.sin(2*np.pi*np.cumsum(f)/SR)*np.exp(-x*3.5)
+L=7.05
+# duck the groove under the logo
 x=np.arange(N)/SR
+duck=1-0.65*np.clip((x-(L-0.15))/0.15,0,1)*np.clip(1-(x-(L+1.6))/0.8,0,1)
+out*=duck[:,None]
+add(boom(),L,0,0.9)
+for i,(f,dt) in enumerate([(523.25,0.0),(659.25,0.16),(783.99,0.32)]):   # Do-Mi-Sol: "BAM-TEK-NO"
+    add(bell(f),L+dt,(i-1)*0.3,0.32)
+add(bell(1046.5,2.4),L+0.52,0,0.28)    # parlak final notası
 out*=np.minimum(1,x/.3)[:,None]*np.minimum(1,(DUR-x)/1.2)[:,None]
 out=np.tanh(out*1.1); out/=np.abs(out).max()/0.89
 w=wave.open(sys.argv[1],'wb'); w.setnchannels(2); w.setsampwidth(2); w.setframerate(SR)
